@@ -14,9 +14,10 @@ def compute_react36(full_name):
 
 	parsed_url = urlparse(repo_url)
 	owner = parsed_url.path.split('/')[1]
+	repo_name = parsed_url.path.split('/')[2]
 
 	local_url_base = f'repo_folder'
-	local_url = f'repo_folder/{owner}'
+	local_url = f'repo_folder/{repo_name}'
 
 	first_commit = None
 	for commit in Repository(repo_url, clone_repo_to=local_url_base).traverse_commits():
@@ -46,19 +47,35 @@ def compute_react36(full_name):
 				if curr_conts[auth] >= 1:
 					contributors.add(auth)
 		else:
-			if commit_count >= 50:
+			if commit_count >= 20:
 				remove_auths = set()
 				for auth in contributors:
-					if curr_conts[auth] < 3:
+					if curr_conts[auth] < 2:
 						remove_auths.add(auth)
 				contributors -= remove_auths
 
 		last_time_period = curr_time_period
-		curr_time_period = curr_time_period + timedelta(days=90)
+		curr_time_period = curr_time_period + timedelta(days=60)
 		first_run = False
 
 	print(contributors)
 
-	
+	num_cont = len(contributors)
 
-compute_react36("komodorio/helm-dashboard")
+	return num_cont
+
+	if num_cont <= 0:
+		return 0
+	elif num_cont <= 1:
+		return 0.2
+	elif num_cont <= 2:
+		return 0.4
+	elif num_cont <= 3:
+		return 0.6
+	elif num_cont <= 4:
+		return 0.8
+	else:
+		return 1
+
+print(compute_react36("komodorio/helm-dashboard"))
+#print(compute_react36("nocodb/nocodb"))
