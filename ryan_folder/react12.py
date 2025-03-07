@@ -2,6 +2,11 @@ import requests
 import base64
 import ollama
 
+'''
+ReACT_12: Incorporate an open-source license.
+
+Find license link via github api. Quickly analyze whether its open source.
+'''
 def compute_react12(full_name):
 	api_url = f'https://api.github.com/repos/{full_name}/license'
 
@@ -14,7 +19,7 @@ def compute_react12(full_name):
 	license = bytes.decode("utf-8")
 
 	query = f"Here is a license for a software project:\n\n{license}\n\nIs this license an open-source license? Respond with either a YES or a NO and nothing else!"
-	response = ollama.chat(model="codellama:13b", messages=[{"role": "user", "content": query}])
+	response = ollama.chat(model="llama2:7b", messages=[{"role": "user", "content": query}])
 	print(response)
 
 	for license_type in license_types:
@@ -23,4 +28,4 @@ def compute_react12(full_name):
 
 	return 0
 
-print(compute_react12("nocodb/nocodb"))
+print(compute_react12("komodorio/helm-dashboard"))

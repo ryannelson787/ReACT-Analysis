@@ -6,8 +6,7 @@ from collections import defaultdict
 '''
 ReACT_36: Maintain a small number of core/active developers.
 
-Check over 90 day periods for active contributors (over 5 commits).
-See h
+Check first 180 days of project and see who was a committer. Then check every 60 day period after to see if committers were consistently active.
 '''
 def compute_react36(full_name):
 	repo_url = f'https://github.com/{full_name}'
