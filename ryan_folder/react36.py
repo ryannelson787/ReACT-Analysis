@@ -63,18 +63,5 @@ def compute_react36(full_name):
 
 	return num_cont
 
-	if num_cont <= 0:
-		return 0
-	elif num_cont <= 1:
-		return 0.2
-	elif num_cont <= 2:
-		return 0.4
-	elif num_cont <= 3:
-		return 0.6
-	elif num_cont <= 4:
-		return 0.8
-	else:
-		return 1
-
 print(compute_react36("komodorio/helm-dashboard"))
-#print(compute_react36("nocodb/nocodb"))
+print(compute_react36("nocodb/nocodb"))

@@ -18,9 +18,14 @@ def compute_react12(full_name):
 	bytes = base64.b64decode(data['content'])
 	license = bytes.decode("utf-8")
 
-	query = f"Here is a license for a software project:\n\n{license}\n\nIs this license an open-source license? Respond with either a YES or a NO and nothing else!"
-	response = ollama.chat(model="llama2:7b", messages=[{"role": "user", "content": query}])
-	print(response)
+	for i in range(3):
+		query = f"Here is a license for a software project:\n\n{license}\n\nIs this license an open-source license? Respond with either a YES or a NO and a quick justification to your answer!"
+		response = ollama.chat(model="llama2:7b", messages=[{"role": "user", "content": query}])
+		
+		if "YES" in response:
+			return 1
+		elif "NO" in response:
+			return 0
 
 	for license_type in license_types:
 		if license_type in data['license']['name']:

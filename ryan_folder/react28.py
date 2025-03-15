@@ -9,9 +9,9 @@ import os
 '''
 ReACT_28: Maintain a well-structured design.
 
-
+This ReACT script development was aided by the use of ChatGPT.
 '''
-def compute_react36(full_name):
+def compute_react28(full_name):
 	repo_url = f'https://github.com/{full_name}'
 
 	parsed_url = urlparse(repo_url)
@@ -77,5 +77,5 @@ def get_source_files(root_dir, valid_extensions=None):
                 source_files.append(os.path.join(root, file))
     return source_files
 
-print(compute_react36("komodorio/helm-dashboard"))
-print(compute_react36("nocodb/nocodb"))
+print(compute_react28("komodorio/helm-dashboard"))
+print(compute_react28("nocodb/nocodb"))
