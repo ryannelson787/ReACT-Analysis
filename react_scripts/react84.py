@@ -27,7 +27,7 @@ def compute_react84(full_name):
     local_url = f'repo_folder/{repo_name}'
 
     if not os.path.exists(local_url):
-        os.system(f"git clone {repo_url} {local_url}")
+        os.system(f"git clone --depth=1 {repo_url} {local_url}")
 
     repo = git.Repo(local_url)
     repo.git.checkout(repo.head.commit)
