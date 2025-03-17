@@ -3,7 +3,7 @@ import datetime
 import numpy as np
 import os
 from dotenv import load_dotenv
-from datetime import datetime
+import datetime
 
 load_dotenv()
 github_token = os.getenv("GITHUB_TOKEN")
