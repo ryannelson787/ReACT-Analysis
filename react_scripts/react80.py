@@ -5,6 +5,12 @@ import git
 import os
 import random
 from urllib.parse import urlparse
+from dotenv import load_dotenv
+from datetime import datetime
+
+load_dotenv()
+github_token = os.getenv("GITHUB_TOKEN")
+github_user = os.getenv("GITHUB_USER")
 
 '''
 ReACT_80: Make governance explicit
@@ -12,7 +18,7 @@ ReACT_80: Make governance explicit
 Find relevant files and analyze them for explicit governance using LLM's.
 '''
 def compute_react80(full_name):
-    repo_url = f'https://github.com/{full_name}'
+    repo_url = f'https://{github_user}:{github_token}@github.com/{full_name}'
 
     parsed_url = urlparse(repo_url)
     owner = parsed_url.path.split('/')[1]

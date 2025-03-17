@@ -5,6 +5,12 @@ from collections import defaultdict
 import lizard
 import git
 import os
+from dotenv import load_dotenv
+from datetime import datetime
+
+load_dotenv()
+github_token = os.getenv("GITHUB_TOKEN")
+github_user = os.getenv("GITHUB_USER")
 
 '''
 ReACT_28: Maintain a well-structured design.
@@ -12,7 +18,7 @@ ReACT_28: Maintain a well-structured design.
 This ReACT script development was aided by the use of ChatGPT.
 '''
 def compute_react28(full_name):
-    repo_url = f'https://github.com/{full_name}'
+    repo_url = f'https://{github_user}:{github_token}@github.com/{full_name}'
 
     parsed_url = urlparse(repo_url)
     owner = parsed_url.path.split('/')[1]

@@ -5,6 +5,12 @@ import git
 import os
 import random
 from urllib.parse import urlparse
+from dotenv import load_dotenv
+from datetime import datetime
+
+load_dotenv()
+github_token = os.getenv("GITHUB_TOKEN")
+github_user = os.getenv("GITHUB_USER")
 
 '''
 ReACT_72: Improve naming in the source code
@@ -12,7 +18,7 @@ ReACT_72: Improve naming in the source code
 Go through each code file, ask LLM how good naming is using key naming conventions.
 '''
 def compute_react72(full_name):
-    repo_url = f'https://github.com/{full_name}'
+    repo_url = f'https://{github_user}:{github_token}@github.com/{full_name}'
 
     parsed_url = urlparse(repo_url)
     owner = parsed_url.path.split('/')[1]
