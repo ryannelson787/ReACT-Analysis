@@ -138,12 +138,12 @@ def check_maintainer_responsiveness(full_name):
         return response_times
     return []
 
-print(compute_react84("facebook/react"))
-print(compute_react84("flutter/flutter"))
-print(compute_react84("facebook/react-native"))
-print(compute_react84("tensorflow/tensorflow"))
-print(compute_react84("kubernetes/kubernetes"))
-print(compute_react84("microsoft/vscode"))
-print(compute_react84("beniz/seeks"))
-print(compute_react84("gitorious/mainline"))
-print(compute_react84("znes/renpass"))
+# print(compute_react84("facebook/react"))
+# print(compute_react84("flutter/flutter"))
+# print(compute_react84("facebook/react-native"))
+# print(compute_react84("tensorflow/tensorflow"))
+# print(compute_react84("kubernetes/kubernetes"))
+# print(compute_react84("microsoft/vscode"))
+# print(compute_react84("beniz/seeks"))
+# print(compute_react84("gitorious/mainline"))
+# print(compute_react84("znes/renpass"))
