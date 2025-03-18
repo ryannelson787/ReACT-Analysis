@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[6]:
-
-
 import requests
 # Common programming languages
 
@@ -27,10 +21,3 @@ def compute_react3(full_name):
 
 
     return sum(1 for lang in languages.keys() if lang in common_languages)
-
-
-# In[ ]:
-
-
-
-
