@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[4]:
-
-
 import requests
 #Tag tasks based on their complexity level
 
@@ -29,12 +23,5 @@ def compute_react23(full_name):
 
    
     return 1 if has_complexity_tag else 0
-
-
-
-
-# In[ ]:
-
-
 
 
