@@ -1,13 +1,26 @@
 import requests
 import ollama
 import base64
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+token = os.getenv("GITHUB_TOKEN")
+
+if not token:
+    raise ValueError("GitHub token not found. Please set GITHUB_TOKEN in your .env file.")
 
 def compute_react31(full_name):
+    headers = {
+        "Accept": "application/vnd.github.v3+json",
+        "Authorization": f"token {token}"
+    }
+
     api_url_readme = f'https://api.github.com/repos/{full_name}/readme'
     api_url_contributing = f'https://api.github.com/repos/{full_name}/contents/CONTRIBUTING.md'
 
-    response_readme = requests.get(api_url_readme)
-    response_contributing = requests.get(api_url_contributing)
+    response_readme = requests.get(api_url_readme, headers=headers)
+    response_contributing = requests.get(api_url_contributing, headers=headers)
 
     readme_content = ""
     contributing_content = ""
@@ -28,7 +41,5 @@ def compute_react31(full_name):
     
     response = ollama.chat(model="llama2:7b", messages=[{"role": "user", "content": query}])
 
-    if "YES" in response.get("message", {}).get("content", "").strip():
-        return 1
-    else:
-        return 0
+    return 1 if "YES" in response.get("message", {}).get("content", "").strip() else 0
+
