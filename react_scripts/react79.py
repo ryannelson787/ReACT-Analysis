@@ -1,15 +1,5 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[3]:
-
-
 import requests
 import ollama
-
-'''
-ReACT_79: Help potential contributors evaluate the project fit.
-'''
 
 def compute_react79(full_name):
     contents_url = f'https://api.github.com/repos/{full_name}/contents/'
@@ -31,15 +21,8 @@ def compute_react79(full_name):
             readme_content = response.text
             query = f"Does the following README.md help potential contributors evaluate if this project is a good fit for them?\n\n{readme_content}\n\nRespond with either a YES or a NO and nothing else!"
             ollama_response = ollama.chat(model="llama2:7b", messages=[{"role": "user", "content": query}])
-            has_contributor_info = "YES" in ollama_response["message"]["content"]
+
+            if ollama_response.get("message", {}).get("content", "").strip() == "YES":
+                has_contributor_info = True
 
     return 1 if any([has_readme, has_contributing, has_docs, has_contributor_info]) else 0
-
-
-
-
-# In[ ]:
-
-
-
-
