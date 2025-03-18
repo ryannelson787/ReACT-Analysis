@@ -1,10 +1,13 @@
 import requests
 from datetime import datetime, timedelta
 import ollama
+import os
+from dotenv import load_dotenv
  
 def react_94(full_name):
 
-    token = "github_token"
+    load_dotenv()
+    token = os.getenv("GITHUB_TOKEN")
     headers = {"Accept": "application/vnd.github.v3+json", "Authorization": f"token {token}"}
     
     repo_url = f"https://api.github.com/repos/{full_name}"
@@ -66,4 +69,4 @@ def react_94(full_name):
     response = ollama.chat(model="llama3:8b", messages=[{"role": "user", "content": query}])
     return response['message']['content']
 
-print(react_94("donnemartin/system-design-primer")) 
+# print(react_94("donnemartin/system-design-primer")) 

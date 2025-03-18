@@ -1,10 +1,13 @@
 import requests
 from datetime import datetime, timedelta
 import ollama
+import os
+from dotenv import load_dotenv
     
 def react_30(full_name):
 
-    token = "github_token"
+    load_dotenv()
+    token = os.getenv("GITHUB_TOKEN")
     headers = {"Accept": "application/vnd.github.v3+json", "Authorization": f"token {token}"}
     
     repo_url = f"https://api.github.com/repos/{full_name}"
@@ -22,13 +25,21 @@ def react_30(full_name):
 
     response = requests.get(f"{repo_url}/contents", headers=headers)
     if response.status_code == 200:
-        repo_files = {file["name"]: file["download_url"] for file in response.json() if any(ci in file["name"] for ci in ci_files)}
+        repo_files = {
+            file["name"]: file["download_url"]
+            for file in response.json()
+            if any(ci in file["name"] for ci in ci_files) and file.get("download_url")
+        }
     else:
         repo_files = {}
 
     response = requests.get(f"{repo_url}/contents/.github/workflows", headers=headers)
     if response.status_code == 200:
-        workflow_files = {file["name"]: file["download_url"] for file in response.json()}
+        workflow_files = {
+            file["name"]: file["download_url"]
+            for file in response.json()
+            if file.get("download_url") 
+        }
     else:
         workflow_files = {}
 
@@ -81,4 +92,4 @@ def react_30(full_name):
 
     return response['message']['content']
 
-print(react_30("public-apis/public-apis")) 
+# print(react_30("public-apis/public-apis")) 

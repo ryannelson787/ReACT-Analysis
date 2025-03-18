@@ -2,23 +2,26 @@ import requests
 import re
 from datetime import datetime, timedelta
 import ollama
+import os
+from dotenv import load_dotenv
  
-def react_74(full_name):
+def react_78(full_name):
 
-    token = "github_token"
+    load_dotenv()
+    token = os.getenv("GITHUB_TOKEN")
     headers = {"Accept": "application/vnd.github.v3+json", "Authorization": f"token {token}"}
     
     repo_url = f"https://api.github.com/repos/{full_name}"
 
     comment_patterns = {
-    "python": r"#.*|'''(.*?)'''|\"\"\"(.*?)\"\"\"",
-    "javascript": r"//.*|/\*(.*?)\*/",
-    "java": r"//.*|/\*(.*?)\*/",
-    "c": r"//.*|/\*(.*?)\*/",
-    "cpp": r"//.*|/\*(.*?)\*/"
-}
+        "python": r"#.*|'''(?:.*?)'''|\"\"\"(?:.*?)\"\"\"",
+        "javascript": r"//.*|/\*(?:.*?)\*/",
+        "java": r"//.*|/\*(?:.*?)\*/",
+        "c": r"//.*|/\*(?:.*?)\*/",
+        "cpp": r"//.*|/\*(?:.*?)\*/"
+    }
     
-    supported_languages = [".py", ".java", ".cpp", ".js"]
+    supported_languages = [".py", ".java", ".cpp", ".js", ".c"]
     
     response = requests.get(f"{repo_url}/contents", headers=headers)
     if response.status_code == 200:
@@ -47,7 +50,12 @@ def react_74(full_name):
             lang = "c"
 
         comment_matches = re.findall(comment_patterns.get(lang, ""), content, re.DOTALL)
-        comments = [match.strip() for match in comment_matches if match]
+        comments = []
+        for match in comment_matches:
+            if isinstance(match, tuple): 
+                comments.extend([m.strip() for m in match if m]) 
+            elif isinstance(match, str):
+                comments.append(match.strip()) 
 
         # Calculate comment ratio
         num_lines = len(content.split("\n"))
@@ -98,4 +106,6 @@ def react_74(full_name):
     response = ollama.chat(model="llama3:8b", messages=[{"role": "user", "content": query}])
     return response['message']['content']
 
-print(react_74("public-apis/public-apis")) 
+
+# print(react_78("public-apis/public-apis"))
+

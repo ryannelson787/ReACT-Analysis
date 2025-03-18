@@ -1,40 +1,31 @@
 import json
 import requests
-import re
-from datetime import datetime, timedelta
-from pydriller import Repository
-from collections import defaultdict
 import ollama
+import os
+from dotenv import load_dotenv
  
 def react_26(full_name):
 
-    token = "github_token"
+    load_dotenv()
+    token = os.getenv("GITHUB_TOKEN")
     headers = {"Accept": "application/vnd.github.v3+json", "Authorization": f"token {token}"}
     
     repo_url = f"https://api.github.com/repos/{full_name}"
 
     test_files = ["tests/", "__tests__/", "test/", "spec/"]
-    ci_files = [
-        ".github/workflows/",
-        ".travis.yml",
-        "Jenkinsfile",
-        ".circleci/config.yml",
-        "azure-pipelines.yml",
-        "bitbucket-pipelines.yml",
-        "gitlab-ci.yml",
-        "circle.yml"
-    ]
 
-    ci_badges = ["github.com/actions", "travis-ci.com", "circleci.com", "jenkins.io"]
-    
     response = requests.get(f"{repo_url}/contents", headers=headers)
     repo_contents = response.json() if response.status_code == 200 else []
 
-    test_files_found = any(test_file in [item["name"] for item in repo_contents] for test_file in test_files)
+    test_files_found = any(item["name"] in test_files or any(ext in item["name"] for ext in [".test.", ".spec."]) for item in repo_contents)
 
     response = requests.get(f"{repo_url}/contents/.github/workflows", headers=headers)
     if response.status_code == 200:
-        ci_workflows = {item["name"]: requests.get(item["download_url"]).text for item in response.json()}
+        ci_workflows = {
+            item["name"]: requests.get(item["download_url"]).text 
+            for item in response.json() 
+            if item.get("download_url")  
+        }
     else:
         ci_workflows = {}
     
@@ -46,4 +37,6 @@ def react_26(full_name):
 
     return response['message']['content']
 
-print(react_26("public-apis/public-apis")) 
+
+# print(react_26("public-apis/public-apis")) 
+
