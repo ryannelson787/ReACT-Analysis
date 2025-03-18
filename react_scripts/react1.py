@@ -1,38 +1,53 @@
+import requests
+import re
 import json
-from datetime import datetime, timedelta
-from pydriller import Repository
+import os
+from dotenv import load_dotenv
 
-def functionality():
-    repo_data = r"C:\Users\srijh\Downloads\github_repos.json"
-    out_data = "react_1_results.json"
-    with open(repo_data, "r", encoding='utf-8') as file:
-        repos = json.load(file)
-    active_since_date = datetime.now() - timedelta(days=90)
-    analy_reposito = {}
-    for repo in repos:  
-        repo_url = repo["url"]
-        contrib = set()
-        int_prior = []
-        for commit in Repository(path_to_repo=repo_url, since=active_since_date).traverse_commits():
-            contrib.add(commit.author.email)
-            if 'Merge pull request' in commit.msg:
-                int_prior.append({
-                    'pr_id': commit.hash,
-                    'author': commit.author.name,
-                    'comments': len(commit.msg.split('\n')) 
-                })
+load_dotenv()
+token = os.getenv("GITHUB_TOKEN")
 
-        analy_reposito[repo_url] = {
-            'active_contributors': len(contrib),
-            'pull_request_interactions': int_prior
-        }
 
-        print(f"URL of the repo: {repo_url}")
-        print(f"Active Dev count: {len(contrib)}")
-        print(f"PRI: {len(int_prior)}\n")
+HEADERS = {
+    "Accept": "application/vnd.github.v3+json",
+    "Authorization": f"token {token}"
+}
 
-    with open(out_data, "w", encoding='utf-8') as outfile:
-        json.dump(analy_reposito, outfile, indent=2)
+def react_1(repo_full_name: str) -> bool:
     
-    print("Info is saved")
-functionality()
+    friendly_supportive_found = False
+    
+    try:
+        url_code_of_conduct = f"https://api.github.com/repos/{repo_full_name}/contents/CODE_OF_CONDUCT.md"
+        response_coc = requests.get(url_code_of_conduct, headers=HEADERS)
+
+        if response_coc.status_code == 200:
+            friendly_supportive_found = True
+            #print(f"[{repo_full_name}] Found CODE_OF_CONDUCT.md.")
+    except Exception as e:
+        print(f"[{repo_full_name}] Error checking CODE_OF_CONDUCT.md: {e}")
+
+    try:
+        url_issues = f"https://api.github.com/repos/{repo_full_name}/issues?state=all&per_page=10"
+        response_issues = requests.get(url_issues, headers=HEADERS)
+
+        if response_issues.status_code == 200:
+            issues = response_issues.json()
+            positive_pattern = re.compile(r"\b(thank|thanks|appreciate|welcome|friendly)\b", re.IGNORECASE)
+
+            for issue in issues:
+                title = issue.get("title", "")
+                body = issue.get("body", "")
+
+                if positive_pattern.search(title) or positive_pattern.search(body):
+                    friendly_supportive_found = True
+                    #print(f"[{repo_full_name}] Positive language found in issue #{issue.get('number')}: '{title}'")
+                    break
+        #else:
+         #   print(f"[{repo_full_name}] Could not fetch issues. HTTP {response_issues.status_code}")
+    except Exception as e:
+        print(f"[{repo_full_name}] Error checking issues: {e}")
+         
+    return friendly_supportive_found
+
+print(react_1("public-apis/public-apis"))
