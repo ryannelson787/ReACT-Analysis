@@ -5,10 +5,13 @@ from datetime import datetime, timedelta
 from pydriller import Repository
 from collections import defaultdict
 import ollama
+import os
+from dotenv import load_dotenv
  
 def react_70(full_name):
 
-    token = "github_token"
+    load_dotenv()
+    token = os.getenv("GITHUB_TOKEN")
     headers = {"Accept": "application/vnd.github.v3+json", "Authorization": f"token {token}"}
     
     repo_url = f"https://api.github.com/repos/{full_name}"
@@ -62,4 +65,5 @@ def react_70(full_name):
 
     return response['message']['content']
 
-print(react_70("public-apis/public-apis")) 
+# print(react_70("public-apis/public-apis")) 
+

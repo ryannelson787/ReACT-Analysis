@@ -4,10 +4,13 @@ import re
 from datetime import datetime, timedelta
 from collections import defaultdict
 import ollama
+import os
+from dotenv import load_dotenv
     
 def react_6(full_name):
 
-    token = "github_token"
+    load_dotenv()
+    token = os.getenv("GITHUB_TOKEN")
     headers = {"Accept": "application/vnd.github.v3+json", "Authorization": f"token {token}"}
     
     repo_url = f"https://api.github.com/repos/{full_name}"
@@ -48,24 +51,13 @@ def react_6(full_name):
     else:
         has_recent_successful_runs = False
     
-    print(f"CI Configuration Files Found: {has_ci_files}")
-    print(f"CI/CD Badges in README: {has_ci_badges}")
-    print(f"Recent Successful CI Runs: {has_recent_successful_runs}")
+    # print(f"CI Configuration Files Found: {has_ci_files}")
+    # print(f"CI/CD Badges in README: {has_ci_badges}")
+    # print(f"Recent Successful CI Runs: {has_recent_successful_runs}")
     
-    # if has_ci_files or has_ci_badges or has_recent_successful_runs:
-    #     return True
-    # else:
-    #     return False
-    
-    query = f"""Analyze the following GitHub repository for Continuous Integration (CI) maintenance. 
-    Look for CI/CD configurations in {ci_files} and look for the following CI/CD badges {ci_badges} in the readme. 
-    Identify whether automated tests are being executed, whether builds are passing, and if workflows are frequently run.
-    Check for CI best practices such as linting, security scans, and deployment pipelines. 
-    Based on your analysis, just reply with a True if this repository maintains CI, otherwise return False. Here is the repository: {repo_url}. 
-    Remember, only reply with True or False."""
+    if has_ci_files or has_ci_badges or has_recent_successful_runs:
+        return True
+    else:
+        return False
 
-    response = ollama.chat(model="llama3:8b", messages=[{"role": "user", "content": query}])
-
-    return response['message']['content']
-
-print(react_6("public-apis/public-apis")) 
+# print(react_6("public-apis/public-apis")) 

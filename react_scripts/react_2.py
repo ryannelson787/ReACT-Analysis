@@ -7,7 +7,8 @@ from collections import defaultdict
 import pytz
 import pandas as pd
 from concurrent.futures import ThreadPoolExecutor
-
+import os
+from dotenv import load_dotenv
 
 class TruckFactor:
     def __init__(self, full_name, headers):
@@ -82,8 +83,8 @@ class TruckFactor:
 def react_2(full_name):
     
     utc=pytz.UTC
-
-    token = "github_token"
+    load_dotenv()
+    token = os.getenv("GITHUB_TOKEN")
     headers = {"Accept": "application/vnd.github.v3+json", "Authorization": f"token {token}"}
 
     repo_url = f"https://github.com/{full_name}"
@@ -101,7 +102,7 @@ def react_2(full_name):
         contributors[author]["num_commits"] += 1
         contributors[author]["files_modified"].update(file.filename for file in commit.modified_files)
 
-    new_contributors = {author: data for author, data in contributors.items() if data["first_commit"] > last_tfdd}
+    new_contributors = {author: data for author, data in contributors.items() if data["first_commit"] and last_tfdd and data["first_commit"] > last_tfdd}
 
     # for author, data in new_contributors.items():
     #     print(f"New Contributor: {author}")
@@ -109,6 +110,9 @@ def react_2(full_name):
     #     print(f"Number of Commits: {data['num_commits']}")
     #     print(f"Files Modified: {', '.join(data['files_modified'])}\n")
 
+    print(len(new_contributors))
     return len(new_contributors)
 
-print(react_2("donnemartin/system-design-primer")) 
+# print(react_2("donnemartin/system-design-primer")) 
+
+

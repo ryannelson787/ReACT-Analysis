@@ -4,6 +4,8 @@ import re
 from datetime import datetime
 from collections import defaultdict
 import ollama
+import os
+from dotenv import load_dotenv
 
 def location_to_continent(location):
 
@@ -14,7 +16,8 @@ def location_to_continent(location):
 
 def react_54(full_name):
 
-    token = "github_token"
+    load_dotenv()
+    token = os.getenv("GITHUB_TOKEN")
     headers = {"Accept": "application/vnd.github.v3+json", "Authorization": f"token {token}"}
 
     repo_url = f"https://api.github.com/repos/{full_name}/contributors"
@@ -35,7 +38,6 @@ def react_54(full_name):
 
     continent_counts = defaultdict(int)
     for location in locations:
-        
         continent = location_to_continent(location)
         # print(location, continent)
         if continent in ["Africa", "Asia", "Australia", "Europe", "North America", "South America"]:
@@ -47,4 +49,4 @@ def react_54(full_name):
     
     return num_continents
 
-print(react_54("donnemartin/system-design-primer"))
+# print(react_54("donnemartin/system-design-primer"))
