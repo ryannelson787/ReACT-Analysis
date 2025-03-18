@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[4]:
-
-
 import requests
 import ollama
 
@@ -38,11 +32,4 @@ def compute_react43(full_name):
 
    
     return sum([has_codespaces_config, mentions_online_IDE])
-
-
-
-# In[ ]:
-
-
-
 
