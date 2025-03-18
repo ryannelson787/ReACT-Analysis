@@ -1,47 +1,68 @@
+import requests
 import json
-from pydriller import Repository
-from datetime import datetime, timedelta
+import re
+import sys
+from typing import Optional, Dict
+import os
+from dotenv import load_dotenv
 
-def functionality(repo_data, output_file):
-    with open(repo_data, 'r', encoding='utf-8') as file:
-        repos = json.load(file)
-    keywords = {
-        'error_messages': ['error message', 'exception', 'fail'],
-        'logging': ['log', 'logging', 'logger'],
-        'coding_standards': ['style', 'format', 'PEP8', 'lint'],
-        'static_analysis': ['pylint', 'flake8', 'sonarqube', 'static analysis']
-    }
-    cleanup_info = {}
-    for repo in repos:
-        repo_url = repo.get('url')  
-        if not repo_url:
-            continue
+load_dotenv()
+token = os.getenv("GITHUB_TOKEN")
 
-        print(f"Analyzing repos: {repo_url}...")
-        cleanup_info[repo_url] = {
-            'error_messages': [],
-            'logging': [],
-            'coding_standards': [],
-            'static_analysis': []
-        }
+
+
+def react_73(repo_full_name: str) -> bool:
+
+    headers = {"Accept": "application/vnd.github.v3+json"}
+    if token:
+        headers["Authorization"] = f"token {token}"
+
+    
+    cleanup_pattern = re.compile(
+        r"(cleanup|refactor|lint|static analysis|error messages|logging improvements)",
+        re.IGNORECASE
+    )
+
+   
+    cleanup_found = False
+
+    try:
+        commits_url = f"https://api.github.com/repos/{repo_full_name}/commits?per_page=30"
+        resp_commits = requests.get(commits_url, headers=headers)
+        if resp_commits.status_code == 200:
+            commits_data = resp_commits.json()
+            for commit in commits_data:
+                message = commit.get("commit", {}).get("message", "")
+                if cleanup_pattern.search(message):
+                    cleanup_found = True
+                    # print(f"[{repo_full_name}] Found cleanup keyword in commit message: '{message}'")
+                    break
+        else:
+            # print(f"[{repo_full_name}] Could not fetch commits. HTTP {resp_commits.status_code}")
+            pass
+    except Exception as e:
+        # print(f"[{repo_full_name}] Error checking commits: {e}")
+        pass
+
+    if not cleanup_found:
         try:
-            for commit in Repository(path_to_repo=repo_url).traverse_commits():
-                commit_message = commit.msg.lower()
-                for category, kw_list in keywords.items():
-                    if any(kw in commit_message for kw in kw_list):
-                        cleanup_info[repo_url][category].append({
-                            'commit_hash': commit.hash,
-                            'author': commit.author.name,
-                            'date': commit.author_date.strftime('%Y-%m-%d %H:%M:%S'),
-                            'message': commit.msg
-                        })
+            pulls_url = f"https://api.github.com/repos/{repo_full_name}/pulls?state=all&per_page=30"
+            resp_pulls = requests.get(pulls_url, headers=headers)
+            if resp_pulls.status_code == 200:
+                pulls_data = resp_pulls.json()
+                for pr in pulls_data:
+                    title = pr.get("title", "")
+                    if cleanup_pattern.search(title):
+                        cleanup_found = True
+                        # print(f"[{repo_full_name}] Found cleanup keyword in PR title: '{title}'")
+                        break
+            else:
+                # print(f"[{repo_full_name}] Could not fetch pull requests. HTTP {resp_pulls.status_code}")
+                pass
         except Exception as e:
-            print(f"Error found in{repo_url}: {e}")
-            cleanup_info[repo_url]['error'] = str(e)
-    with open(output_file, 'w', encoding='utf-8') as f:
-        json.dump(cleanup_info, f, indent=4)
-    print(f"Results  are saved to {output_file}")
-if __name__ == "__main__":
-    repo_data = r"C:\Users\srijh\Downloads\github_repos.json" 
-    out_data= "react73_results.json"  
-    functionality(repo_data, out_data)
+            # print(f"[{repo_full_name}] Error checking pull requests: {e}")
+            pass
+
+    return cleanup_found
+
+print(react_73("public-apis/public-apis"))

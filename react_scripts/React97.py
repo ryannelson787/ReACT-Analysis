@@ -1,49 +1,92 @@
+import requests
 import json
-from pydriller import Repository
+import re
+import sys
+from typing import Optional, Dict
+import os
+from dotenv import load_dotenv
 
-def functionality(repos_file, out_doc):
+load_dotenv()
+token = os.getenv("GITHUB_TOKEN")
+
+def react_97(repo_full_name: str) -> bool:
     
+
+  
+    headers = {"Accept": "application/vnd.github.v3+json"}
+    if token:
+        headers["Authorization"] = f"token {token}"
+
     
-    with open(repos_file, 'r', encoding='utf-8') as file:
-        repos = json.load(file)
+    tutorial_pattern = re.compile(
+        r"(tutorial|video|demo|screenshot|step[-\s]*by[-\s]*step|guide|documentation)",
+        re.IGNORECASE
+    )
 
-   
-    keywords = ['tutorial', 'documentation', 'docs', 'guide', 'how-to', 'readme', 'example']
+    tutorial_found = False
+    try:
+        readme_url = f"https://api.github.com/repos/{repo_full_name}/readme"
+        resp_readme = requests.get(readme_url, headers=headers)
 
-    results_obtained = {}
+        if resp_readme.status_code == 200:
+            file_info = resp_readme.json()
+            import base64
+            content_encoded = file_info.get("content", "")
+            content_decoded = base64.b64decode(content_encoded).decode("utf-8", errors="replace")
 
-    for repo in repos:
-        repo_url = repo.get('url')
-        if not repo_url:
-            continue
+            if tutorial_pattern.search(content_decoded):
+                tutorial_found = True
+                # print(f"[{repo_full_name}] README contains tutorial-related keywords.")
+        else:
+            # print(f"[{repo_full_name}] No README or not accessible (HTTP {resp_readme.status_code}).")
+            pass
+    except Exception as e:
+        # print(f"[{repo_full_name}] Error reading README: {e}")
+        pass
 
-        print(f"Analyzing repos: {repo_url}...")
-        tutorial_commits = []
+    if not tutorial_found:
         try:
-            for commit in Repository(repo_url).traverse_commits():
-                commit_message = commit.msg.lower()
-                if any(keyword in commit_message for keyword in keywords):
-                    tutorial_commits.append({
-                        'commit_hash': commit.hash,
-                        'author': commit.author.name,
-                        'date': commit.author_date.strftime('%Y-%m-%d %H:%M:%S'),
-                        'message': commit.msg
-                    })
+            commits_url = f"https://api.github.com/repos/{repo_full_name}/commits?per_page=30"
+            resp_commits = requests.get(commits_url, headers=headers)
+
+            if resp_commits.status_code == 200:
+                commits_data = resp_commits.json()
+                for commit in commits_data:
+                    message = commit.get("commit", {}).get("message", "")
+                    if tutorial_pattern.search(message):
+                        tutorial_found = True
+                        # print(f"[{repo_full_name}] Found tutorial-related keyword in commit: '{message}'")
+                        break
+            else:
+                # print(f"[{repo_full_name}] Could not fetch commits (HTTP {resp_commits.status_code}).")
+                pass
         except Exception as e:
-            print(f"Error processing {repo_url}: {e}")
-            results_obtained[repo_url] = {'error': str(e)}
-            continue
+            # print(f"[{repo_full_name}] Error checking commits: {e}")
+            pass
 
-        
-        results_obtained[repo_url] = tutorial_commits
+    if not tutorial_found:
+        try:
+            pulls_url = f"https://api.github.com/repos/{repo_full_name}/pulls?state=all&per_page=30"
+            resp_pulls = requests.get(pulls_url, headers=headers)
 
- 
-    with open(out_doc, 'w', encoding='utf-8') as f:
-        json.dump(results_obtained, f, indent=4)
+            if resp_pulls.status_code == 200:
+                pulls_data = resp_pulls.json()
+                for pr in pulls_data:
+                    pr_title = pr.get("title", "")
+                    pr_body = pr.get("body", "")
+                    combined_text = pr_title + " " + pr_body
 
-    print(f"Results are saved to {out_doc}")
+                    if tutorial_pattern.search(combined_text):
+                        tutorial_found = True
+                        # print(f"[{repo_full_name}] Found tutorial-related keyword in PR #{pr.get('number')}.")
+                        break
+            else:
+                # print(f"[{repo_full_name}] Could not fetch pull requests (HTTP {resp_pulls.status_code}).")
+                pass
+        except Exception as e:
+            # print(f"[{repo_full_name}] Error checking pull requests: {e}")
+            pass
 
-if __name__ == "__main__":
-    repos_file = r"C:\Users\srijh\Downloads\github_repos.json" 
-    out_doc = "react97_results.json"  
-    functionality(repos_file, out_doc)
+    return tutorial_found
+
+print(react_97("public-apis/public-apis"))
